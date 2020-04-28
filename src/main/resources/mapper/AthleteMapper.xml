@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.sdu.ise.labs.dao.AthleteMapper">
+    <resultMap id="BaseResultMap" type="cn.edu.sdu.ise.labs.model.Athlete">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="athlete_code" jdbcType="VARCHAR" property="athleteCode"/>
+        <result column="reg_code" jdbcType="VARCHAR" property="regCode"/>
+        <result column="team_code" jdbcType="VARCHAR" property="teamCode"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="id_number" jdbcType="VARCHAR" property="idNumber"/>
+        <result column="id_type" jdbcType="INTEGER" property="idType"/>
+        <result column="gender" jdbcType="BIT" property="gender"/>
+        <result column="age" jdbcType="INTEGER" property="age"/>
+        <result column="competition_event_code" jdbcType="VARCHAR" property="competitionEventCode"/>
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy"/>
+        <result column="deleted" property="deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, athlete_code, reg_code, team_code, name, id_number, id_type, gender, age, competition_event_code, 
+    created_at, updated_at, created_by, updated_by,deleted
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from athlete
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from athlete
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="cn.edu.sdu.ise.labs.model.Athlete">
+    insert into athlete (id, athlete_code, reg_code, 
+      team_code, name, id_number, 
+      id_type, gender, age, competition_event_code, 
+      created_at, updated_at, created_by, 
+      updated_by)
+    values (#{id,jdbcType=INTEGER}, #{athleteCode,jdbcType=VARCHAR}, #{regCode,jdbcType=VARCHAR}, 
+      #{teamCode,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{idNumber,jdbcType=VARCHAR}, 
+      #{idType,jdbcType=INTEGER}, #{gender,jdbcType=BIT}, #{age,jdbcType=INTEGER}, #{competitionEventCode,jdbcType=VARCHAR}, 
+      #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, 
+      #{updatedBy,jdbcType=VARCHAR})
+  </insert>
+
+
+    <update id="updateByPrimaryKey" parameterType="cn.edu.sdu.ise.labs.model.Athlete">
+    update athlete
+    set athlete_code = #{athleteCode,jdbcType=VARCHAR},
+      reg_code = #{regCode,jdbcType=VARCHAR},
+      team_code = #{teamCode,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      id_number = #{idNumber,jdbcType=VARCHAR},
+      id_type = #{idType,jdbcType=INTEGER},
+      gender = #{gender,jdbcType=BIT},
+      age = #{age,jdbcType=INTEGER},
+      competition_event_code = #{competitionEventCode,jdbcType=VARCHAR},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      created_by = #{createdBy,jdbcType=VARCHAR},
+      updated_by = #{updatedBy,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <!-- 获取运动员(分页) -->
+    <select id="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from athlete
+        <where>
+            deleted = 0
+            <if test="queryDTO.teamCode!=null">
+                and team_code = #{queryDTO.teamCode}
+            </if>
+            <if test="queryDTO.regCode!=null">
+                and reg_code like #{queryDTO.regCode}
+            </if>
+            <if test="queryDTO.idNumber != null">
+                and id_number like #{queryDTO.idNumber}
+            </if>
+            <if test="queryDTO.name!=null">
+                and name like #{queryDTO.name}
+            </if>
+        </where>
+        limit #{offset}, #{limit}
+    </select>
+    <!-- 获取运动员详情 -->
+    <select id="getByCode" resultMap="BaseResultMap">
+        select+
+        <include refid="Base_Column_List"/>
+        from athlete
+        where
+        athlete_code =#{athleteCode}
+        and deleted = 0
+    </select>
+    <!-- 根据代码列表获取部门列表 -->
+    <select id="listByCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from athlete
+        where
+        <if test="athleteCode != null">
+            athlete_code like #{athleteCode}
+        </if>
+        and deleted = 0
+    </select>
+
+    <!-- 批量删除 -->
+    <!--    <select id="deleteByCodes" resultType="integer">-->
+    <update id="deleteByCodes">
+        update athlete
+        set deleted = 1
+        where athlete_code in
+        <foreach item="item" index="index" collection="codeList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+    <!-- 获取名字个数(分页) -->
+    <select id="count" resultType="integer">
+        select count(*)
+        from athlete
+        <where>
+            deleted = 0
+            <if test="queryDTO.teamCode!=null">
+                and team_code = #{queryDTO.teamCode}
+            </if>
+            <if test="queryDTO.regCode!=null">
+                and reg_code like #{queryDTO.regCode}
+            </if>
+            <if test="queryDTO.idNumber != null">
+                and id_number like #{queryDTO.idNumber}
+            </if>
+            <if test="queryDTO.name!=null">
+                and name like #{queryDTO.name}
+            </if>
+
+        </where>
+    </select>
+    <select id="countRegCode" resultType="integer">
+        select count(*)
+        from athlete
+        <where>
+            <if test="DTO.regCode != null">
+                reg_code =#{DTO.regCode}
+                and team_code = #{DTO.teamCode}
+            </if>
+            and deleted = 0
+        </where>
+    </select>
+    <select id="countCompetitionEventCode" resultType="integer">
+        select count(*)
+        from competition_event
+        <where>
+            <if test="DTO.CompetitionEventCode != null">
+                competition_event_code =#{DTO.competitionEventCode}
+            </if>
+            and deleted = 0
+        </where>
+    </select>
+    <select id="countRegCode2" resultType="integer">
+        select count(*)
+        from athlete
+        <where>
+            deleted = 0
+            <if test="DTO.regCode != null">
+                and athlete_code != #{DTO.athleteCode}
+                and reg_code =#{DTO.regCode}
+                and team_code =#{DTO.teamCode}
+            </if>
+
+        </where>
+    </select>
+    <select id="countCompetitionEventCode2" resultType="integer">
+        select count(*)
+        from competition_event
+        <where>
+            <if test="DTO.CompetitionEventCode != null">
+                competition_event_code =#{DTO.competitionEventCode}
+            </if>
+            and deleted = 0
+        </where>
+    </select>
+    <select id="countAC" resultType="integer">
+        select count(*)
+        from athlete
+        <where>
+            athlete_code = #{athleteCode}
+        </where>
+    </select>
+</mapper>

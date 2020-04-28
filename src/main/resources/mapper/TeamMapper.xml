@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.sdu.ise.labs.dao.TeamMapper">
+    <resultMap id="BaseResultMap" type="cn.edu.sdu.ise.labs.model.Team">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="team_code" property="teamCode" jdbcType="VARCHAR"/>
+        <result column="team_name" property="teamName" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="contact" property="contact" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, team_code, team_name, province, contact, phone, description, created_at, updated_at, 
+    created_by, updated_by
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from team
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from team
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="cn.edu.sdu.ise.labs.model.Team">
+    insert into team (id, team_code, team_name, 
+      province, contact, phone, 
+      description, created_at, updated_at, 
+      created_by, updated_by)
+    values (#{id,jdbcType=INTEGER}, #{teamCode,jdbcType=VARCHAR}, #{teamName,jdbcType=VARCHAR}, 
+      #{province,jdbcType=VARCHAR}, #{contact,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
+      #{createdBy,jdbcType=VARCHAR}, #{updatedBy,jdbcType=VARCHAR})
+  </insert>
+
+    <update id="updateByPrimaryKey" parameterType="cn.edu.sdu.ise.labs.model.Team">
+    update team
+    set team_code = #{teamCode,jdbcType=VARCHAR},
+      team_name = #{teamName,jdbcType=VARCHAR},
+      province = #{province,jdbcType=VARCHAR},
+      contact = #{contact,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      created_by = #{createdBy,jdbcType=VARCHAR},
+      updated_by = #{updatedBy,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <!-- 根据队伍名称查询当前值 -->
+    <select id="listByName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from team
+        where
+        deleted = 0
+        <if test="teamName!=null">
+            and team_name like #{teamName}
+        </if>
+
+    </select>
+    <!-- 获取比赛项目信息) -->
+    <select id="getByCode" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from team
+        where
+        team_code=#{teamCode}
+    </select>
+</mapper>
